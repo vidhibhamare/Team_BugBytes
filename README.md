@@ -39,6 +39,8 @@ This is a very simple idea, but can always be improvised. </br>
  
 
 * Preview: <br/>
+<img width="653" alt="Screen Shot 2022-12-08 at 5 32 01 PM" src="https://user-images.githubusercontent.com/94922120/206442600-5579e241-cea8-4c4b-bb5a-bd1eaba2c9e8.png">
+
 <img width="653" alt="Screen Shot 2022-12-08 at 5 27 59 PM" src="https://user-images.githubusercontent.com/94922120/206441827-4d319fa3-d400-4b6b-987a-a1634aead28f.png">
 
 
