@@ -1,0 +1,165 @@
+<html>
+  <head>
+      <style>
+          body {background-color: pink;}
+          h1   {color: blue;}
+          p    {color: red;}
+          button {border-radius: 1px;color:white; background-color: #4CAF50;}
+          </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.21.3/maps/maps.css"
+    />
+    <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.21.3/maps/maps-web.min.js"></script>
+    <script sum= "https://api.tomtom.com/search/2/nearbySearch/.json?key="vHY8HBoyFKPfbwRlKjgz4iC52FcHsdfk" &lat=36.98844 &lon=-121.97483"></script>
+  <script src="https://api.tomtom.com/search/2/searchAlongRoute/restaurant.json?key="vHY8HBoyFKPfbwRlKjgz4iC52FcHsdfk"&maxDetourTime=1000 "></script>
+    <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.21.3/services/services-web.min.js"></script>
+  </head>
+  <body >
+    <input type="text" id="myText" value=" " />
+    <button onclick="searchCity()">SEARCH</button>
+    <button onclick="clearMarkers()">CLEAR MARKER</button>
+    <button onclick="createRoute()">CREATE ROUTE</button>
+
+    <div id="distance"></div>
+    <div id="result"></div>
+    <div style="width: 90vw; height: 90vh;" id="map"></div>
+
+    <script>
+      var APIKEY = "vHY8HBoyFKPfbwRlKjgz4iC52FcHsdfk";
+      var MADRID = [-3.70379, 40.416775];
+      var LISBON = [-9.1393, 38.7222];
+      var GENT = [3.7174, 51.0543];
+      var CARDIFF = { lat: 51.473721746532846, lng: -3.1727336268581894 };
+      var home = [73.0297, 19.033];
+
+      var map = tt.map({
+        key: APIKEY,
+        container: "map",
+        center: home,
+        zoom: 14
+        //style:'tomtom://vector/1/basic-main'
+      });
+
+      var markers = [];
+
+      map.on("click", function (event) {
+        console.log(event);
+        var marker = new tt.Marker().setLngLat(event.lngLat).addTo(map);
+        markers.push(marker);
+      });
+
+      var clearMarkers = function () {
+        for (marker of markers) {
+          marker.remove();
+        }
+        markers = [];
+      };
+
+      var moveMapTo = function (lnglat) {
+        map.setCenter(lnglat);
+      };
+
+      var handleSearchResults = function (result) {
+        console.log(result);
+        if (result.results) {
+          moveMapTo(result.results[0].position);
+          const address = result.results[0].address.freeformAddress;
+          console.log(`found ${result.results.length} places`);
+          console.log(`address: ${address}`);
+          document.getElementById("result").innerHTML =
+            result.results[0].poi.name;
+          var marker = new tt.Marker()
+            .setLngLat(result.results[0].position)
+            .addTo(map);
+        }
+      };
+
+      var searchCity = function () {
+        var API_KEY = "vHY8HBoyFKPfbwRlKjgz4iC52FcHsdfk";
+        tt.services
+          .fuzzySearch({
+            fetchReply: true,
+            key: API_KEY,
+            query: document.getElementById("myText").value,
+            idxSet: ""
+            //boundingBox: map.getBounds()
+          })
+          //.go()
+          .then(handleSearchResults);
+      };
+
+      var displayRoute = function (geoJSON) {
+        routeLayer = map.addLayer({
+          id: "route",
+          type: "line",
+          source: {
+            type: "geojson",
+            data: geoJSON
+          },
+          paint: {
+            "line-color": "green",
+            "line-width": 10
+          }
+        });
+      };
+
+      var createRoute = function () {
+        var routeOptions = {
+          key: "vHY8HBoyFKPfbwRlKjgz4iC52FcHsdfk",
+          locations: [],
+          travelMode: "truck"
+          //vehicleLoadType: 'USHazmatClass1'
+          //vehicleAdrTunnelRestrictionCode:'B'
+        };
+
+        for (marker of markers) {
+          routeOptions.locations.push(marker.getLngLat());
+        }
+
+        tt.services.calculateRoute(routeOptions).then(function (routeData) {
+          (document.getElementById("distance").innerHTML ==
+            "Total distance" + routeData.routes[0].summary.lengthInMeters) ==
+            "mts";
+          console.log(routeData);
+          var geo = routeData.toGeoJson();
+          displayRoute(geo);
+          let fuel = routeData.routes[0].summary.fuelPrice;
+          let dist = routeData.routes[0].summary.lengthInMeters / 1000;
+          const dist2 = dist.toFixed(3);
+          let time = routeData.routes[0].summary.travelTimeInSeconds / 60;
+          const time2 = time.toFixed(3);
+          alert("The total distance: " + dist2 + " km");
+          alert("Total time of the journey: " +time2+" minutes" );
+
+
+          console.log("The total distance: " + dist2+ " km");
+          console.log("Total time of the journey: " + time2 + " minutes");
+          let no_of_days= (time/540);
+          let break_time= (no_of_days*3.75);
+          let rest_time =(240*time)/540;
+          const break_time2 = break_time.toFixed(3);
+          console.log("Break time: "+break_time2+" hours");
+          console.log("Fuel price: "+fuel);
+          alert("Break Time for the journey: "+break_time2+ " hours");
+        });
+        function showTime(){
+          (routeData.routes[0].summary.travelTimeInSeconds / 60);
+        }
+        function showDistance(){
+          (routeData.routes[0].summary.lengthInMeters / 1000);
+        }
+      };
+
+
+    </script>
+
+<!-- <<form action="index10.html" method="get">
+    Click to show:
+
+    <<button onclick="showTime()" type="button" name="button" value="time">Time</button>
+    <<button onclick="showDistance()" type="button" name="button" value="distance">Distance</button>
+  </form> -->
+  </body>
+</html>
